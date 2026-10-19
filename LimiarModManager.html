@@ -3080,12 +3080,15 @@ document.addEventListener('keydown', (event) => {
       }
     };
   } catch (lmError) { console.error('[LimiarModManager] falha ao interceptar a renderização:', lmError); }
+  const touchPrimary = (function () { try { return !!(G.touch || (typeof matchMedia === 'function' && matchMedia('(hover: none) and (pointer: coarse)').matches)); } catch (e) { return !!G.touch; } })();
+  if (window.addEventListener && document.addEventListener) document.addEventListener('touchstart', function () { touchPrimaryOn = true; }, { once: true, passive: true });
+  let touchPrimaryOn = touchPrimary;
   state.renderHooks.post.push(() => {
     const tWrap = state.touchWrap;
     if (!tWrap) return;
     let any = false;
     for (let i = 0; i < state.touchButtons.length; i++) { if (!state.touchButtons[i].hidden) { any = true; break; } }
-    const on = (!!(G.touch && G.ctx) && Game.state === 'playing' && state.touchButtons.length > 0 && any);
+    const on = (touchPrimaryOn && Game.state === 'playing' && state.touchButtons.length > 0 && any);
     tWrap.style.display = on ? 'flex' : 'none';
     for (let i = 0; i < state.touchButtons.length; i++) {
       const tb = state.touchButtons[i];

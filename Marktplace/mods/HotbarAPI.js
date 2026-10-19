@@ -124,7 +124,8 @@
     var css = '.limiar-hotbar{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9280;display:flex;gap:10px;pointer-events:none}' +
       '.limiar-slot{pointer-events:auto;width:56px;height:56px;border-radius:12px;background:rgba(16,18,22,.82);border:2px solid #4a5560;color:#fff;font:26px/50px sans-serif;text-align:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;cursor:pointer;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.5)}' +
       '.limiar-slot b{position:absolute;top:2px;left:5px;font:600 10px sans-serif;opacity:.7}' +
-      '.limiar-slot.on{background:rgba(60,140,255,.35);border-color:#9adcff;box-shadow:0 0 14px rgba(90,170,255,.6)}';
+      '.limiar-slot.on{background:rgba(60,140,255,.35);border-color:#9adcff;box-shadow:0 0 14px rgba(90,170,255,.6)}' +
+      '@media (hover:none) and (pointer:coarse){.limiar-slot{width:64px;height:64px;border-radius:14px;font:30px/58px sans-serif}}';
     var style = document.createElement('style');
     style.textContent = css;
     document.head.appendChild(style);
