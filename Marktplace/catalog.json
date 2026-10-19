@@ -1,0 +1,62 @@
+{
+  "name": "Limiar Mod Marketplace",
+  "description": "Mods comunitários compatíveis com o Limiar Mod Manager.",
+  "modsDirectory": "mods",
+  "entries": [
+    {
+      "file": "mods/Cheats.js",
+      "name": "Cheats",
+      "description": "Voo, noclip, velocidade 10x, teleporte por coordenadas, teleporte para a parte 2 do jogo e desempenho máximo."
+    },
+    {
+      "file": "mods/PortalGun.js",
+      "name": "Portal Gun",
+      "description": "Arma de portais 3D azul e laranja: dispare um projétil e um portal colorido abre onde ele acertar, com visão em tempo real e teleporte ao atravessá-los."
+    },
+    {
+      "file": "mods/Terror10x.js",
+      "name": "Terror 10x",
+      "description": "Deixa o terror 10x pior: escuridão falhante, vinheta opressiva, sussurros e sons do pesadelo, e uma criatura de olhos brancos que espreita — e caça no campo da árvore. Susto garantido."
+    },
+    {
+      "file": "mods/HotbarAPI.js",
+      "name": "HotbarAPI",
+      "description": "API para outros mods criarem itens na barra rápida (hotbar) embaixo da tela: teclas 1-8 ou toque selecionam, clique/USAR aciona."
+    },
+    {
+      "file": "mods/VeicAPI.js",
+      "name": "VeicAPI",
+      "description": "API para outros mods criarem veículos dirigíveis: motos, carros, skates... Sobe com E ou botão PILOTAR, dirige com WASD, buzina com H."
+    },
+    {
+      "file": "mods/Pistol.js",
+      "name": "Pistol",
+      "description": "Dá uma pistola ao jogador (item na HotbarAPI): 3 tiros derrubam a criatura do jogo e a do Terror 10x por um tempo."
+    },
+    {
+      "file": "mods/Bazuka.js",
+      "name": "Bazuka",
+      "description": "Bazuka destrutiva (item na HotbarAPI): foguete ultrarrápido que abre buracos REAIS nas paredes (remove colisão e deforma a geometria), destroços voando, flash, fogo, onda de choque, fumaça, faíscas e boom pesado. Um tiro vira a criatura."
+    },
+    {
+      "file": "mods/Skate.js",
+      "name": "Skate",
+      "description": "Skate dirigível feito com a VeicAPI + item na HotbarAPI: solte o skate no chão e carveie pelas zonas com sons de rodinha."
+    },
+    {
+      "file": "mods/VooLivre.js",
+      "name": "Voo Livre",
+      "description": "Ativa voo, noclip e ajuste de velocidade."
+    },
+    {
+      "file": "mods/Teleporte.js",
+      "name": "Teleporte",
+      "description": "Teleporta o jogador para coordenadas escolhidas."
+    },
+    {
+      "file": "mods/DesempenhoMaximo.js",
+      "name": "Desempenho MAX",
+      "description": "Reduz qualidade e efeitos para priorizar desempenho."
+    }
+  ]
+}
