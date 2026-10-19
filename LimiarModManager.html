@@ -122,11 +122,13 @@
 
     /* ══════════════════════════════════════════════════════════════════
        URL DO MARKETPLACE (GitHub) — EDITE AQUI
-       Coloque a URL do seu repositório público com uma pasta mods/ e,
-       opcionalmente, um catalog.json.
+       Coloque a URL do seu repositório público com a pasta de mods
+       (MARKETPLACE_DIR abaixo). Os nomes, descrições, versões e
+       dependências (depends) vêm do próprio código de cada mod.
        Ex.: https://github.com/usuario/limiar-mods
        ══════════════════════════════════════════════════════════════════ */
-    const MARKETPLACE_REPO = 'https://github.com/bodagrande/limiar-mods';
+    const MARKETPLACE_REPO = 'https://github.com/HenzoPaes/LimiarModManager';
+    const MARKETPLACE_DIR = 'Marktplace/';
 
     const $ = (id) => document.getElementById(id);
     const LS_KEYS = {
@@ -2224,7 +2226,7 @@
 
     function extractModMeta(filename, source) {
       const fallback = filename.replace(/\.(html?|js)$/i, '');
-      const meta = { name: fallback, description: '', version: '' };
+      const meta = { name: fallback, description: '', version: '', depends: [] };
       let head = source.slice(0, 9000);
       const reg = /api\s*\.\s*register\s*\(/.exec(source);
       if (reg) head = source.slice(reg.index, reg.index + 9000);
@@ -2234,6 +2236,12 @@
       if (dm) meta.description = dm[2].replace(/\\'/g, "'").trim();
       const vm = /\bversion\s*:\s*["']([^"']+)["']/.exec(head);
       if (vm) meta.version = vm[1];
+      const dpm = /\bdepends\s*:\s*\[([\s\S]*?)\]/.exec(head);
+      if (dpm) {
+        meta.depends = (dpm[1].match(/(["'])((?:(?!\1)[\s\S])*?)\1/g) || [])
+          .map((item) => item.slice(1, -1).replace(/\\'/g, "'"))
+          .filter(Boolean);
+      }
       return meta;
     }
 
@@ -2285,23 +2293,85 @@
       }
     }
 
+    async function getEntrySource(entry) {
+      if (entry.source) return entry.source;
+      const response = await fetch(rawUrl(currentRepo.owner, currentRepo.repo, currentRepo.branch, MARKETPLACE_DIR + entry.path));
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      entry.source = await response.text();
+      return entry.source;
+    }
+
+    async function installEntry(entry) {
+      const source = await getEntrySource(entry);
+      const mod = parseMod(entry.path.split('/').pop(), source);
+      mod.name = entry.name || mod.name;
+      addMod(mod);
+      return mod.name;
+    }
+
+    function missingDeps(entry) {
+      return (entry.depends || [])
+        .filter((depName) => !modList.some((mod) => (mod.name || '').toLowerCase() === depName.toLowerCase()))
+        .map((depName) => marketEntries.find((candidate) => (candidate.name || '').toLowerCase() === depName.toLowerCase()))
+        .filter(Boolean);
+    }
+
+    function askInstallDeps(entry, missing) {
+      return new Promise((resolve) => {
+        const names = missing.map((m) => m.name);
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px';
+        const box = document.createElement('div');
+        box.style.cssText = 'background:#1b1b21;color:#e9e9ef;border:1px solid #3a3a44;border-radius:12px;max-width:440px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.5)';
+        const title = document.createElement('h3');
+        title.textContent = entry.name + ' precisa de outros mods';
+        const text = document.createElement('p');
+        const strong = names.map((n) => '<b>' + n.replace(/</g, '&lt;') + '</b>').join(', ');
+        text.innerHTML = 'Na hora de rodar, ' + entry.name.replace(/</g, '&lt;') + ' usa ' + strong + '. Quer instalar ' + (names.length === 1 ? 'ele' : 'todos') + ' junto?';
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap';
+        const yes = document.createElement('button');
+        yes.textContent = 'INSTALAR TUDO (' + (missing.length + 1) + ')';
+        const only = document.createElement('button');
+        only.textContent = 'SÓ ' + entry.name.toUpperCase().replace(/</g, '&lt;');
+        const no = document.createElement('button');
+        no.textContent = 'CANCELAR';
+        [yes, only, no].forEach((b) => {
+          b.type = 'button';
+          b.style.cssText = 'padding:9px 14px;border-radius:8px;border:1px solid #44454f;background:#2c2d35;color:#e9e9ef;cursor:pointer;font-weight:700;font-size:12px;letter-spacing:.04em';
+          b.onclick = () => { overlay.remove(); resolve(b === yes ? 'all' : b === only ? 'only' : null); };
+        });
+        yes.style.borderColor = '#6ac1ff';
+        row.append(no, only, yes);
+        box.append(title, text, row);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+      });
+    }
+
     async function installMarketEntry(entry, button) {
       button.disabled = true;
       button.textContent = 'INSTALANDO…';
       try {
-        let source = entry.source;
-        if (!source) {
-          const response = await fetch(rawUrl(currentRepo.owner, currentRepo.repo, currentRepo.branch, entry.path));
-          if (!response.ok) throw new Error('HTTP ' + response.status);
-          source = await response.text();
-          entry.source = source;
+        const missing = missingDeps(entry);
+        if (missing.length) {
+          const choice = await askInstallDeps(entry, missing);
+          if (!choice) {
+            button.disabled = false;
+            button.textContent = 'INSTALAR';
+            setMarketStatus('Instalação cancelada.');
+            return;
+          }
+          if (choice === 'all') {
+            for (const dep of missing) {
+              setMarketStatus('Instalando ' + dep.name + ' (dependência de ' + entry.name + ')…');
+              await installEntry(dep);
+            }
+          }
         }
-        const mod = parseMod(entry.path.split('/').pop(), source);
-        mod.name = entry.name || mod.name;
-        addMod(mod);
-        button.textContent = 'INSTALADO';
-        button.classList.add('installed');
-        setMarketStatus(mod.name + ' instalado e salvo! Veja na aba MEUS MODS.');
+        const modName = await installEntry(entry);
+        renderMarketplace(marketEntries);
+        setMarketStatus(modName + ' instalado e salvo! Veja na aba MEUS MODS.');
       } catch (error) {
         button.disabled = false;
         button.textContent = 'INSTALAR';
@@ -2324,27 +2394,20 @@
         const tree = await githubJson('https://api.github.com/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repoName) + '/git/trees/' + encodeURIComponent(currentRepo.branch) + '?recursive=1');
         if (tree.truncated) throw new Error('O marketplace é grande demais para a listagem do GitHub.');
         const paths = tree.tree
-          .filter((item) => item.type === 'blob' && /\.(js|html?)$/i.test(item.path) && !/catalog\.json$/i.test(item.path) && !/(^|\/)\./.test(item.path))
+          .filter((item) => item.type === 'blob' && /\.(js|html?)$/i.test(item.path) && !/(^|\/)\./.test(item.path))
+          .filter((item) => item.path.startsWith(MARKETPLACE_DIR))
           .sort((a, b) => a.path.localeCompare(b.path))
-          .map((item) => item.path);
+          .map((item) => item.path.slice(MARKETPLACE_DIR.length));
         if (!paths.length) { renderMarketplace([]); return; }
         setMarketStatus('Lendo ' + paths.length + ' mod(s)…');
-        let catalogDesc = {};
-        try {
-          const resCat = await fetch(rawUrl(owner, repoName, currentRepo.branch, 'catalog.json'));
-          if (resCat.ok) {
-            const cat = await resCat.json();
-            if (cat && Array.isArray(cat.entries)) cat.entries.forEach((e) => { catalogDesc[e.file] = e.description || ''; });
-          }
-        } catch (e) {}
         const entries = [];
         for (const path of paths) {
           try {
-            const res = await fetch(rawUrl(owner, repoName, currentRepo.branch, path));
+            const res = await fetch(rawUrl(owner, repoName, currentRepo.branch, MARKETPLACE_DIR + path));
             if (!res.ok) continue;
             const source = await res.text();
             const meta = extractModMeta(path, source);
-            entries.push({ path: path, name: meta.name, description: meta.description || catalogDesc[path] || '', version: meta.version, source: source });
+            entries.push({ path: path, name: meta.name, description: meta.description, version: meta.version, depends: meta.depends || [], source: source });
           } catch (e) { /* pula arquivos ilegíveis */ }
         }
         marketLoaded = true;

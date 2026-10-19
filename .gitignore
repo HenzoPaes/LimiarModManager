@@ -1,0 +1,16 @@
+# Sistema
+Thumbs.db
+.DS_Store
+*.log
+
+# Node
+node_modules/
+
+# Editor
+.vscode/
+.idea/
+
+# Backups temporários
+*.bak
+
+VAZIO_versao_0_1_6.html

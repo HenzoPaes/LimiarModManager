@@ -12,6 +12,7 @@
     id: 'pistol',
     name: 'Pistol',
     version: '1.0.0',
+    depends: ['HotbarAPI'],
     description: 'Dá uma pistola para o jogador matar os monstros! Aparece como item na HotbarAPI: teclas 1-8/toque selecionam, clique esquerdo (mira travada) ou botão ATIRAR dispara. Na criatura do jogo e na do Terror 10x: 3 tiros derrubam ela por um bom tempo.',
     settings: [
       { id: 'enabled', label: 'Pistola disponível', type: 'toggle', default: true }

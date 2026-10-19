@@ -18,8 +18,9 @@ O carregamento é feito pela API pública do GitHub e por `raw.githubusercontent
 - `VooLivre.js`: controles independentes de voo, noclip e velocidade.
 - `HotbarAPI.js`: API pra colocar itens numa hotbar no pé da tela (teclas 1-8/toque, botão USAR).
 - `VeicAPI.js`: API pra criar veículos dirigíveis com entrada/saída, sons e botões de toque.
+- `BetterCollisionsAPI.js`: API de colisão robusta pra mods — `window.LimiarBetterCollisions.cast(pos, dir, dist)` integra colliders do World.col, raycast de mesh e chão num único cast por segmento (funciona mesmo quando o raycast simples falha).
 - `Pistol.js`: pistola pronta (item da HotbarAPI) que derruba os monstros com 3 tiros.
-- `Bazuka.js`: bazuka destrutiva (item da HotbarAPI): foguete ultrarrápido que abre buracos reais nas paredes — remove a colisão e deforma a geometria do mundo na explosão, derrubando destroços com física, scorch na parede, flash, bola de fogo, onda de choque, fumaça, faíscas e boom pesado.
+- `Bazuka.js`: bazuka destrutiva (item da HotbarAPI): foguete ultrarrápido que abre buracos reais nas paredes — remove a colisão e deforma a geometria do mundo na explosão, derrubando destroços com física, scorch na parede, flash, bola de fogo, onda de choque, fumaça, faíscas e boom pesado. Usa a BetterCollisionsAPI (se ativa) para garantir o impacto na parede.
 - `Skate.js`: skate dirigível (VeicAPI + HotbarAPI), com sons de rodinha.
 - `Terror10x.js`: escuridão pesada que falha e treme, vinheta opressiva e sons do pesadelo (coração, sussurros, respiros, gritos). Uma criatura alta de olhos brancos espreite qualquer lugar e, no campo da árvore (parte 2), caça o jogador de verdade.
 - `Teleporte.js`: teleporte por coordenadas.

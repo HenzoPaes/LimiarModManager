@@ -9,6 +9,7 @@
     id: 'skate',
     name: 'Skate',
     version: '1.0.0',
+    depends: ['HotbarAPI', 'VeicAPI'],
     description: 'Um skate pras ruas do jogo! Feito com a VeicAPI e colocando um item na HotbarAPI: selecione o item do skate e use (clique nos numero/toque USAR) para soltar o skate no chão. Chegue perto, aperte E ou toque PILOTAR para subir. Dirija com WASD/botões, carveie, e ouça as rodinhas chiando. Solte outro quando quiser.',
     settings: [
       { id: 'enabled', label: 'Skate disponível', type: 'toggle', default: true }

@@ -78,7 +78,6 @@
   }
 
   function useActive() {
-    console.error('[DBG-HB] useActive: active=' + (st.active ? st.active.id : 'nulo') + ' state=' + g.Game.state);
     if (!st.active || typeof st.active.onUse !== 'function') return;
     if (g.Game.state !== 'playing') return;
     try { st.active.onUse(); } catch (e) { console.error('[HotbarAPI] onUse:', e); }

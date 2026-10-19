@@ -16,6 +16,7 @@
     id: 'bazuka',
     name: 'Bazuka',
     version: '1.0.0',
+    depends: ['HotbarAPI'],
     description: 'Bazuka DESTRUTORA: dispara um foguete ultrarrápido que ABRE BURACOS REAIS nas paredes (remove a colisão e afunda a geometria do mundo), solta destroços voando, flash, bola de fogo, onda de choque, fumaça, faíscas e boom pesado. Item da HotbarAPI: teclas 1-8/toque selecionam, clique esquerdo (mira travada) ou botão USAR dispara.',
     settings: [
       { id: 'enabled', label: 'Bazuka disponível', type: 'toggle', default: true },
@@ -53,7 +54,7 @@
           toast('Bazuka no ombro' + (n ? ' (tecla ' + n + ')' : '') + '. Clique esquerdo ou USAR para DEMOLIR.');
         },
         onDeselect: function () { st.selected = false; if (st.gun) st.gun.visible = false; },
-        onUse: function () { console.error('[DBG-BZ] onUse chamado (selected=' + st.selected + ', ready=' + st.ready + ')'); shoot(); }
+        onUse: shoot
       }) : null;
       if (st.item && st.fallback) st.fallback = false;
     } else if (!S.enabled && st.item !== null) {
@@ -248,7 +249,6 @@
     if (BC && BC.cast && g.World && g.World.col) {
       var r = null;
       try { r = BC.cast(origin, dir, 350, { stepLen: 0.8 }); } catch (e) { r = null; }
-      console.error('[DBG-BZ] cast: ' + (r ? ('type=' + r.type + ' dist=' + (r.dist.toFixed ? r.dist.toFixed(2) : r.dist) + ' point=' + (r.point ? (r.point.x.toFixed(1) + ',' + r.point.y.toFixed(1) + ',' + r.point.z.toFixed(1)) : 'null') + ' mesh=' + (r.mesh ? 'sim' : 'nao')) : 'nulo/falhou'));
       if (r && r.hit) {
         var tgt = new T.Vector3(r.point.x, r.point.y, r.point.z);
         st.rocket.custom = {
@@ -304,7 +304,6 @@
     var touch = g.G.touch;
     var cap = st.efx.length < (touch ? 170 : 340);
     st.samples = [];
-    console.error('[DBG-BZ] boom: r=' + (effR.toFixed(1)) + ' ny=' + (n.y ? n.y.toFixed(2) : '0') + ' mesh=' + (hit.object ? (hit.object.name || 'obj') : 'null') + ' ground=' + !!hit.ground);
 
     breakWalls(hit);
 
@@ -415,18 +414,16 @@
 
   function removeColliders(p, R) {
     var col = g.World.col;
-    if (!col || !col.all) { console.error('[DBG-BZ] remove: col indisponivel'); return; }
-    var R2 = R * R, rm = [], i, b, cand = 0, floor = 0;
+    if (!col || !col.all) return;
+    var R2 = R * R, rm = [], i, b;
     for (i = 0; i < col.all.length; i++) {
       b = col.all[i];
       if (!b || b.ramp) continue;
       var qx = clampv(p.x, b.x0, b.x1) - p.x, qy = clampv(p.y, b.y0, b.y1) - p.y, qz = clampv(p.z, b.z0, b.z1) - p.z;
       if (qx * qx + qy * qy + qz * qz > R2) continue;
-      cand++;
-      if (isFloorLike(b)) { floor++; continue; }
+      if (isFloorLike(b)) continue;
       rm.push(b);
     }
-    console.error('[DBG-BZ] remove: cand=' + cand + ' floorLike=' + floor + ' rm=' + rm.length);
     if (!rm.length) return;
     var set = new Set(rm);
     var kept = [];

@@ -9,8 +9,8 @@
   var g = (typeof api !== 'undefined' && api.game) ? api.game : null;
   if (!g) { console.error('[BetterCollisionsAPI] api.game indisponível — atualize o Limiar Mod Manager.'); return; }
 
-  var T = (typeof window.THREE !== 'undefined') ? window.THREE : null;
   var st = { count: 0, ready: false, px: 0, py: 0, pz: 0, dx: 0, dy: 0, dz: 0, maxT: 0, hits: null };
+  function getT() { return (typeof window.THREE !== 'undefined') ? window.THREE : (g && g.THREE ? g.THREE : null); }
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
@@ -146,13 +146,14 @@
 
       // 3) mesh raycast até o hit atual (visual) — também guardamos o primeiro mesh válido mesmo se o box ganhou
       var visibleMesh = null;
+      var T = getT();
       if (useMesh && T && g.Gfx && g.Gfx.scene) {
         try {
           var rc = new T.Raycaster(
             new T.Vector3(st.px, st.py, st.pz),
             new T.Vector3(st.dx, st.dy, st.dz),
             0.01,
-            best ? (best.t + 0.25) : st.maxT
+            best ? (best.t + 3.0) : st.maxT
           );
           var hits = rc.intersectObjects(g.Gfx.scene.children, true);
           for (var h2 = 0; h2 < hits.length; h2++) {
